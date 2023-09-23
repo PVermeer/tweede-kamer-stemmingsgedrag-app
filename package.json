@@ -6,9 +6,24 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "prepare": "husky install",
+    "lint": "npm run eslint .",
+    "lint:fix": "npm run eslint:fix .",
+    "lint:commit": "commitlint --edit",
+    "lint:staged": "lint-staged --concurrent false",
+    "eslint": "eslint --max-warnings=0 --config .eslintrc.json --ignore-path .gitignore",
+    "eslint:fix": "npm run eslint -- --fix",
+    "format": "npm run prettier .",
+    "format:fix": "npm run prettier:write .",
+    "prettier": "prettier --ignore-unknown --check --config .prettierrc.json --ignore-path .gitignore",
+    "prettier:write": "npm run prettier -- --write"
   },
   "private": true,
+  "lint-staged": {
+    "*": "npm run prettier:write",
+    "*.ts": "npm run eslint:fix"
+  },
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
@@ -24,15 +39,28 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.3",
+    "@angular-eslint/builder": "16.2.0",
+    "@angular-eslint/eslint-plugin": "16.2.0",
+    "@angular-eslint/eslint-plugin-template": "16.2.0",
+    "@angular-eslint/schematics": "16.2.0",
+    "@angular-eslint/template-parser": "16.2.0",
     "@angular/cli": "~16.2.3",
     "@angular/compiler-cli": "^16.2.0",
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-angular": "^17.7.0",
     "@types/jasmine": "~4.3.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "eslint": "^8.49.0",
+    "husky": "^8.0.3",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3",
     "typescript": "~5.1.3"
   }
 }
