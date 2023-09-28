@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TweedekamerApiService } from 'src/app/odata-tweedekamer/tweedekamer-api.service';
+import { TweedekamerApiService } from './odata-tweedekamer/tweedekamer-api.service';
 
 @Component({
   selector: 'app-root',
