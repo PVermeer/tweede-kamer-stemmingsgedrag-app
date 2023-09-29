@@ -1,57 +1,21 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ODataServiceFactory } from 'angular-odata';
+import buildQuery from 'odata-query';
 import { Observable, map } from 'rxjs';
-import { Besluit, Fractie } from './tweedekamer-api.types';
+import { Besluit, Fractie, ODataResponse } from './tweedekamer-api.types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TweedekamerApiService {
+  private baseUrl = 'https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/';
+  private besluitUrl = this.baseUrl + 'Besluit';
+  private fractieUrl = this.baseUrl + 'Fractie';
+
   private observablesCache = new Map<string, Observable<unknown>>();
 
-  private besluitEntities = this.tweedeKamerApi
-    .entitySet<Besluit>('besluit')
-    .entities();
-
-  private fractieEntities = this.tweedeKamerApi
-    .entitySet<Fractie>('fractie')
-    .entities();
-
-  public getFracties(year: number): Observable<Fractie[]> {
+  public getFracties(year: number): Observable<Besluit[]> {
     const cacheKey = year + 'fracties';
-    let obs$ = this.observablesCache.get(cacheKey) as
-      | Observable<Fractie[]>
-      | undefined;
-    if (obs$) {
-      return obs$;
-    }
-
-    obs$ = this.fractieEntities
-      .query((q) => {
-        q.filter({
-          or: [
-            { 'year(DatumInactief)': { eq: null } },
-            { 'year(DatumInactief)': { ge: year } },
-          ],
-          Verwijderd: { eq: false },
-        });
-      })
-      .fetchEntities({ withCount: true })
-      .pipe(
-        map((fracties) => {
-          if (!fracties) return [];
-          return fracties;
-        }),
-      );
-
-    this.fractieEntities.clearQuery();
-    this.observablesCache.set(cacheKey, obs$);
-
-    return obs$;
-  }
-
-  public getBesluiten(year: number): Observable<Besluit[]> {
-    const cacheKey = year + 'besluiten';
     let obs$ = this.observablesCache.get(cacheKey) as
       | Observable<Besluit[]>
       | undefined;
@@ -59,24 +23,87 @@ export class TweedekamerApiService {
       return obs$;
     }
 
-    obs$ = this.besluitEntities
-      .query((q) => {
-        q.filter({
-          'year(GewijzigdOp)': { eq: 2023 },
-          Verwijderd: { eq: false },
-          Status: { eq: 'Besluit' },
-          StemmingsSoort: { ne: null },
-        });
-        q.expand({
-          Stemming: {},
-          Zaak: { expand: 'Document' },
-        });
-        q.orderBy('GewijzigdOp asc');
-      })
-      .fetchEntities({ withCount: true })
+    const queryOptions = {
+      filter: {
+        or: [
+          { 'year(DatumInactief)': { eq: null } },
+          { 'year(DatumInactief)': { ge: year } },
+        ],
+        Verwijderd: { eq: false },
+      },
+    };
 
+    const query = buildQuery<Besluit>(queryOptions);
+
+    obs$ = this.http
+      .get<ODataResponse<Besluit[]>>(this.fractieUrl + query)
       .pipe(
-        map((besluiten) => {
+        map(({ value: fracties }) => {
+          if (!fracties) {
+            return [];
+          }
+          return fracties;
+        }),
+      );
+
+    this.observablesCache.set(cacheKey, obs$);
+
+    return obs$;
+  }
+
+  public getBesluiten(
+    year: number,
+    page: number,
+    fractie?: Fractie,
+  ): Observable<Besluit[]> {
+    const cacheKey = year + ' besluiten' + ' page';
+
+    let obs$ = this.observablesCache.get(cacheKey) as
+      | Observable<Besluit[]>
+      | undefined;
+
+    if (obs$) {
+      return obs$;
+    }
+
+    const perPage = 25;
+    const top = perPage;
+    const skip = perPage * (page - 1);
+
+    const queryOptions = {
+      filter: {
+        'year(GewijzigdOp)': { eq: 2023 },
+        Verwijderd: { eq: false },
+        Status: { eq: 'Besluit' },
+        StemmingsSoort: { ne: null },
+        ...(fractie && {
+          Stemming: {
+            any: {
+              Fractie_Id: {
+                eq: {
+                  type: 'guid',
+                  value: fractie.Id,
+                },
+              },
+            },
+          },
+        }),
+      },
+      expand: {
+        Stemming: {},
+        Zaak: { expand: 'Document' },
+      },
+      orderBy: 'GewijzigdOp desc',
+      top,
+      skip,
+    };
+
+    const query = buildQuery<Besluit>(queryOptions);
+
+    obs$ = this.http
+      .get<ODataResponse<Besluit[]>>(this.besluitUrl + query)
+      .pipe(
+        map(({ value: besluiten }) => {
           if (!besluiten) {
             return [];
           }
@@ -84,17 +111,15 @@ export class TweedekamerApiService {
         }),
       );
 
-    this.besluitEntities.clearQuery();
     this.observablesCache.set(cacheKey, obs$);
 
     return obs$;
   }
 
   public getFractieLogoUrl(fractie: Fractie) {
-    const query = this.fractieEntities.entity(fractie.Id).function('resource');
-
-    return query.endpointUrl();
+    const logoUrl = `${this.fractieUrl}/${fractie.Id}/resource`;
+    return logoUrl;
   }
 
-  constructor(private tweedeKamerApi: ODataServiceFactory) {}
+  constructor(private http: HttpClient) {}
 }

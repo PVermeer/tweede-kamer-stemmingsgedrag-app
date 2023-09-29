@@ -98,11 +98,21 @@ interface BesluitI {
   GewijzigdOp: string;
   Id: string;
   Opmerking: string;
-  Status: string;
+  Status:
+    | 'Besluit'
+    | 'Concept voorstel'
+    | 'Nog te verwerken besluit'
+    | 'Voorstel';
   Stemming: Stemming[];
-  StemmingsSoort: string;
+  StemmingsSoort: 'Hoofdelijk' | 'Met handopsteken' | 'Zonder stemming';
   Verwijderd: boolean;
   Zaak: Zaak[];
 }
 
 export type Besluit = Partial<BesluitI>;
+
+export interface ODataResponse<T> {
+  '@odata.context': string;
+  '@odata.nextLink'?: string;
+  value: T;
+}
