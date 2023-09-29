@@ -29,7 +29,7 @@ interface StemmingI {
   Persoon_Id: string;
   SidActorFractie: string;
   SidActorLid: string;
-  Soort: string;
+  Soort: 'Niet' | 'deelgenomen' | 'Tegen' | 'Voor';
   Vergissing: boolean;
   Verwijderd: boolean;
 }

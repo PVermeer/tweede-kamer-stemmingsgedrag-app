@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import buildQuery from 'odata-query';
-import { Observable, map } from 'rxjs';
+import { Observable, map, shareReplay } from 'rxjs';
 import { Besluit, Fractie, ODataResponse } from './tweedekamer-api.types';
 
 @Injectable({
@@ -11,14 +11,17 @@ export class TweedekamerApiService {
   private baseUrl = 'https://gegevensmagazijn.tweedekamer.nl/OData/v4/2.0/';
   private besluitUrl = this.baseUrl + 'Besluit';
   private fractieUrl = this.baseUrl + 'Fractie';
+  private documentUrl = this.baseUrl + 'Document';
 
   private observablesCache = new Map<string, Observable<unknown>>();
 
-  public getFracties(year: number): Observable<Besluit[]> {
+  public getFracties(year: number): Observable<Fractie[]> {
     const cacheKey = year + 'fracties';
+
     let obs$ = this.observablesCache.get(cacheKey) as
-      | Observable<Besluit[]>
+      | Observable<Fractie[]>
       | undefined;
+
     if (obs$) {
       return obs$;
     }
@@ -44,6 +47,7 @@ export class TweedekamerApiService {
           }
           return fracties;
         }),
+        shareReplay(1),
       );
 
     this.observablesCache.set(cacheKey, obs$);
@@ -109,6 +113,7 @@ export class TweedekamerApiService {
           }
           return besluiten;
         }),
+        shareReplay(1),
       );
 
     this.observablesCache.set(cacheKey, obs$);
@@ -116,9 +121,20 @@ export class TweedekamerApiService {
     return obs$;
   }
 
-  public getFractieLogoUrl(fractie: Fractie) {
+  public getFractieLogoUrl(fractie: Fractie): string {
     const logoUrl = `${this.fractieUrl}/${fractie.Id}/resource`;
     return logoUrl;
+  }
+
+  public getBesluitDocumentUrls(besluit: Besluit): string[] {
+    const documentUrls = (besluit.Zaak ?? [])
+      .map((zaak) =>
+        (zaak.Document ?? []).map(
+          (document) => `${this.documentUrl}/${document.Id}/resource`,
+        ),
+      )
+      .flat();
+    return documentUrls;
   }
 
   constructor(private http: HttpClient) {}
