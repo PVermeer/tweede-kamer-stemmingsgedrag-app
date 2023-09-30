@@ -1,8 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import buildQuery from 'odata-query';
-import { Observable, map, shareReplay } from 'rxjs';
-import { Besluit, Fractie, ODataResponse } from './tweedekamer-api.types';
+import { EMPTY, Observable, expand, map, reduce, shareReplay } from 'rxjs';
+import {
+  Besluit,
+  BesluitOptions,
+  Data,
+  Fractie,
+  FractieOptions,
+  ODataResponse,
+} from './tweedekamer-api.types';
 
 @Injectable({
   providedIn: 'root',
@@ -12,14 +19,16 @@ export class TweedekamerApiService {
   private besluitUrl = this.baseUrl + 'Besluit';
   private fractieUrl = this.baseUrl + 'Fractie';
   private documentUrl = this.baseUrl + 'Document';
+  private pageSize = 25;
 
   private observablesCache = new Map<string, Observable<unknown>>();
 
-  public getFracties(year: number): Observable<Fractie[]> {
-    const cacheKey = year + 'fracties';
+  public getFracties(options?: FractieOptions): Observable<Data<Fractie[]>> {
+    const { year, page } = options ?? {};
+    const cacheKey = `${year} fracties`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
-      | Observable<Fractie[]>
+      | Observable<Data<Fractie[]>>
       | undefined;
 
     if (obs$) {
@@ -27,56 +36,48 @@ export class TweedekamerApiService {
     }
 
     const queryOptions = {
+      ...this.getBaseQueryOptions(page),
       filter: {
-        or: [
-          { 'year(DatumInactief)': { eq: null } },
-          { 'year(DatumInactief)': { ge: year } },
-        ],
+        ...(year && {
+          or: [
+            { 'year(DatumInactief)': { eq: null } },
+            { 'year(DatumInactief)': { ge: year } },
+          ],
+        }),
         Verwijderd: { eq: false },
       },
     };
 
-    const query = buildQuery<Besluit>(queryOptions);
+    const query = buildQuery<Fractie>(queryOptions);
+    const queryUrl = this.fractieUrl + query;
 
-    obs$ = this.http
-      .get<ODataResponse<Besluit[]>>(this.fractieUrl + query)
-      .pipe(
-        map(({ value: fracties }) => {
-          if (!fracties) {
-            return [];
-          }
-          return fracties;
-        }),
-        shareReplay(1),
-      );
+    obs$ = this.getODataQueryObservable$<Fractie[]>(queryUrl, page);
 
     this.observablesCache.set(cacheKey, obs$);
 
     return obs$;
   }
 
-  public getBesluiten(
-    year: number,
-    page: number,
-    fractie?: Fractie,
-  ): Observable<Besluit[]> {
-    const cacheKey = year + ' besluiten' + ' page';
+  public getBesluiten({
+    year,
+    page,
+    fractie,
+    onderwerp,
+  }: BesluitOptions): Observable<Data<Besluit[]>> {
+    const cacheKey = `${year} besluiten ${fractie?.Id} ${onderwerp} ${page}`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
-      | Observable<Besluit[]>
+      | Observable<Data<Besluit[]>>
       | undefined;
 
     if (obs$) {
       return obs$;
     }
 
-    const perPage = 25;
-    const top = perPage;
-    const skip = perPage * (page - 1);
-
     const queryOptions = {
+      ...this.getBaseQueryOptions(page),
       filter: {
-        'year(GewijzigdOp)': { eq: 2023 },
+        ...(year && { 'year(GewijzigdOp)': { eq: year } }),
         Verwijderd: { eq: false },
         Status: { eq: 'Besluit' },
         StemmingsSoort: { ne: null },
@@ -92,29 +93,29 @@ export class TweedekamerApiService {
             },
           },
         }),
+        ...(onderwerp && {
+          Zaak: {
+            any: {
+              or: [
+                { Onderwerp: { contains: onderwerp } },
+                { Titel: { contains: onderwerp } },
+                { Citeertitel: { contains: onderwerp } },
+              ],
+            },
+          },
+        }),
       },
       expand: {
         Stemming: {},
         Zaak: { expand: 'Document' },
       },
       orderBy: 'GewijzigdOp desc',
-      top,
-      skip,
     };
 
     const query = buildQuery<Besluit>(queryOptions);
+    const queryUrl = this.besluitUrl + query;
 
-    obs$ = this.http
-      .get<ODataResponse<Besluit[]>>(this.besluitUrl + query)
-      .pipe(
-        map(({ value: besluiten }) => {
-          if (!besluiten) {
-            return [];
-          }
-          return besluiten;
-        }),
-        shareReplay(1),
-      );
+    obs$ = this.getODataQueryObservable$<Besluit[]>(queryUrl, page);
 
     this.observablesCache.set(cacheKey, obs$);
 
@@ -135,6 +136,71 @@ export class TweedekamerApiService {
       )
       .flat();
     return documentUrls;
+  }
+
+  private getBaseQueryOptions(page?: number): {
+    top?: number;
+    skip?: number;
+    count: boolean;
+  } {
+    if (!page) {
+      return { count: true };
+    }
+
+    const perPage = this.pageSize;
+    const top = perPage;
+    const skip = perPage * (page - 1);
+
+    return {
+      top,
+      skip,
+      count: true,
+    };
+  }
+
+  private oDataExpand<T extends ODataResponse>(response: T): Observable<T> {
+    return response['@odata.nextLink']
+      ? this.http.get<T>(response['@odata.nextLink'])
+      : EMPTY;
+  }
+
+  private oDataReduce<T extends ODataResponse>(acc: T, response: T): T {
+    const { value, ...rest } = response;
+    const newAcc = { ...rest, value: [...(acc.value ?? []), ...value] };
+    return newAcc as T;
+  }
+
+  private oDataMap<T extends ODataResponse>(
+    response: T,
+    page: number | null = null,
+  ): Data<T['value']> {
+    const { value, '@odata.count': count } = response;
+
+    if (!count || !page) {
+      return {
+        data: value,
+        currentPage: page,
+        nextPage: null,
+        totalPages: null,
+      };
+    }
+
+    const totalPages = Math.ceil(count / this.pageSize);
+    const nextPage = page < totalPages ? page + 1 : null;
+
+    return { data: value, currentPage: page, nextPage, totalPages };
+  }
+
+  private getODataQueryObservable$<T extends unknown[]>(
+    queryUrl: string,
+    page?: number,
+  ): Observable<Data<T>> {
+    return this.http.get<ODataResponse<T>>(queryUrl).pipe(
+      expand((response) => this.oDataExpand(response)),
+      reduce(this.oDataReduce, {} as ODataResponse<T>),
+      map((response) => this.oDataMap(response, page)),
+      shareReplay(1),
+    );
   }
 
   constructor(private http: HttpClient) {}
