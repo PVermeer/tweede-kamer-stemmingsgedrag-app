@@ -34,10 +34,10 @@
       [attr.colspan]="columnsToDisplay.length"
     >
       <div
-        class="element-detail"
+        class="expanded-detail"
         [@detailExpand]="besluit === expandedElement ? 'expanded' : 'collapsed'"
       >
-        Expanded works!
+        <app-besluit-detail [besluit]="besluit"></app-besluit-detail>
       </div>
     </td>
   </ng-container>
@@ -46,7 +46,7 @@
   <tr
     mat-row
     *matRowDef="let row; columns: columnsToDisplay"
-    class="element-row"
+    class="default-row"
     [class.expanded-row]="expandedElement === row"
     (click)="expandedElement = expandedElement === row ? null : row"
   ></tr>

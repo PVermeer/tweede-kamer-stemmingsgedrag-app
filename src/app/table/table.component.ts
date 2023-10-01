@@ -11,11 +11,12 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { BesluitDetailComponent } from '../besluit-detail/besluit-detail.component';
 
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule],
+  imports: [CommonModule, MatTableModule, BesluitDetailComponent],
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   animations: [

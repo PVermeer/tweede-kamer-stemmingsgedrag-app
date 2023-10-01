@@ -1,0 +1,51 @@
+<div class="container">
+  <mat-accordion>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Stemming </mat-panel-title>
+        <mat-panel-description>
+          {{ besluit.StemmingsSoort }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <ul *ngFor="let stem of besluit.Stemming">
+        <li>{{ stem.ActorNaam }}: {{ stem.Soort }}</li>
+      </ul>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Zaak </mat-panel-title>
+        <mat-panel-description> Documenten </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <ul>
+        <li *ngFor="let zaak of besluit.Zaak">
+          <h3>{{ zaak.Soort }}:</h3>
+          <ul>
+            <li *ngFor="let document of zaak.Document">
+              <span class="mat-subtitle-1">{{ document.Soort }}</span>
+              <br />
+              <span class="mat-subtitle-1 list-secondary-text">{{
+                document.Titel
+              }}</span>
+              <br />
+              <span class="mat-subtitle-1 list-secondary-text">{{
+                document.Onderwerp
+              }}</span>
+              <br />
+              <a
+                mat-stroked-button
+                class="mat-subtitle-1"
+                [href]="document | documentLink"
+                target="_blank"
+              >
+                Download
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

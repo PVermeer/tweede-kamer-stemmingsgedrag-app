@@ -6,6 +6,7 @@ import {
   Besluit,
   BesluitOptions,
   Data,
+  Document,
   Fractie,
   FractieOptions,
   ODataResponse,
@@ -102,7 +103,7 @@ export class TweedekamerApiService {
         }),
       },
       expand: {
-        Stemming: {},
+        Stemming: { orderBy: 'ActorNaam asc' },
         Zaak: { expand: 'Document' },
       },
       orderBy: 'GewijzigdOp desc',
@@ -123,15 +124,9 @@ export class TweedekamerApiService {
     return logoUrl;
   }
 
-  public getBesluitDocumentUrls(besluit: Besluit): string[] {
-    const documentUrls = (besluit.Zaak ?? [])
-      .map((zaak) =>
-        (zaak.Document ?? []).map(
-          (document) => `${this.documentUrl}/${document.Id}/resource`,
-        ),
-      )
-      .flat();
-    return documentUrls;
+  public getDocumentUrl(document: Document): string {
+    const documentUrl = `${this.documentUrl}/${document.Id}/resource`;
+    return documentUrl;
   }
 
   private getBaseQueryOptions(page?: number): {
