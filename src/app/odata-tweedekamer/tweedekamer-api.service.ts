@@ -23,7 +23,7 @@ export class TweedekamerApiService {
 
   private observablesCache = new Map<string, Observable<unknown>>();
 
-  public getFracties(options?: FractieOptions): Observable<Data<Fractie[]>> {
+  public getFracties$(options?: FractieOptions): Observable<Data<Fractie[]>> {
     const { year, page } = options ?? {};
     const cacheKey = `${year} fracties`;
 
@@ -58,12 +58,8 @@ export class TweedekamerApiService {
     return obs$;
   }
 
-  public getBesluiten({
-    year,
-    page,
-    fractie,
-    onderwerp,
-  }: BesluitOptions): Observable<Data<Besluit[]>> {
+  public getBesluiten$(options?: BesluitOptions): Observable<Data<Besluit[]>> {
+    const { year, page, fractie, onderwerp } = options ?? {};
     const cacheKey = `${year} besluiten ${fractie?.Id} ${onderwerp} ${page}`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
