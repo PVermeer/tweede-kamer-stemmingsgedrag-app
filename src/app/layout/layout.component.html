@@ -1,7 +1,17 @@
-<mat-toolbar>
-  <span class="spacer"></span>
-  <span>{{ appTitle }} </span>
-  <span class="spacer"></span>
-</mat-toolbar>
+<div class="container">
+  <div class="toolbar">
+    <mat-toolbar>
+      <span class="spacer"></span>
+      <span>{{ appTitle }} </span>
+      <span class="spacer"></span>
+    </mat-toolbar>
+  </div>
 
-<app-table></app-table>
+  <div class="filter-options">
+    <app-filter-options></app-filter-options>
+  </div>
+
+  <div class="table">
+    <app-table></app-table>
+  </div>
+</div>

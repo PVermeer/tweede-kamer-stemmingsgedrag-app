@@ -60,8 +60,8 @@ export class TweedekamerApiService {
   }
 
   public getBesluiten$(options?: BesluitOptions): Observable<Data<Besluit[]>> {
-    const { year, page, fractie, onderwerp } = options ?? {};
-    const cacheKey = `${year} besluiten ${fractie?.Id} ${onderwerp} ${page}`;
+    const { year, page, fractieId: fractie, onderwerp } = options ?? {};
+    const cacheKey = `${year} besluiten ${fractie} ${onderwerp} ${page}`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
       | Observable<Data<Besluit[]>>
@@ -84,7 +84,7 @@ export class TweedekamerApiService {
               Fractie_Id: {
                 eq: {
                   type: 'guid',
-                  value: fractie.Id,
+                  value: fractie,
                 },
               },
             },
@@ -129,7 +129,11 @@ export class TweedekamerApiService {
     return documentUrl;
   }
 
-  private getBaseQueryOptions(page?: number): {
+  public getPageSize(): number {
+    return this.pageSize;
+  }
+
+  private getBaseQueryOptions(page?: number | null): {
     top?: number;
     skip?: number;
     count: boolean;
@@ -170,6 +174,7 @@ export class TweedekamerApiService {
     if (!count || !page) {
       return {
         data: value,
+        count: count ?? null,
         currentPage: page,
         nextPage: null,
         totalPages: null,
@@ -179,12 +184,12 @@ export class TweedekamerApiService {
     const totalPages = Math.ceil(count / this.pageSize);
     const nextPage = page < totalPages ? page + 1 : null;
 
-    return { data: value, currentPage: page, nextPage, totalPages };
+    return { data: value, count, currentPage: page, nextPage, totalPages };
   }
 
   private getODataQueryObservable$<T extends unknown[]>(
     queryUrl: string,
-    page?: number,
+    page?: number | null,
   ): Observable<Data<T>> {
     return this.http.get<ODataResponse<T>>(queryUrl).pipe(
       expand((response) => this.oDataExpand(response)),

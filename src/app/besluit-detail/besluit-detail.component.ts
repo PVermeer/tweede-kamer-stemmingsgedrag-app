@@ -37,7 +37,5 @@ export class BesluitDetailComponent implements OnInit {
 
   ngOnInit() {
     this.orderStemming();
-
-    console.log(this.besluit);
   }
 }

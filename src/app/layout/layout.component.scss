@@ -1,3 +1,28 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.toolbar {
+  flex: 0;
+}
+
+.filter-options {
+  flex: 0;
+}
+
+.table {
+  flex: 1;
+  overflow: auto;
+}
+
 .spacer {
   flex: 1 1 auto;
 }

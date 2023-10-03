@@ -166,19 +166,20 @@ export interface ODataResponse<T = unknown[]> {
 }
 
 export interface FractieOptions {
-  year?: number;
-  page?: number;
+  year?: number | null;
+  page?: number | null;
 }
 
 export interface BesluitOptions {
-  year?: number;
-  page?: number;
-  fractie?: Fractie;
-  onderwerp?: string;
+  year?: number | null;
+  page?: number | null;
+  fractieId?: Fractie['Id'] | null;
+  onderwerp?: string | null;
 }
 
 export interface Data<T extends ODataResponse['value']> {
   data: T;
+  count: number | null;
   currentPage: number | null;
   nextPage: number | null;
   totalPages: number | null;
