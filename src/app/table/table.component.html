@@ -16,11 +16,16 @@
       <ng-container matColumnDef="onderwerpen">
         <th mat-header-cell *matHeaderCellDef>Onderwerp</th>
         <td mat-cell *matCellDef="let besluit">
-          <ul>
-            <li *ngFor="let onderwerp of besluit.Zaak">
-              {{ onderwerp.Onderwerp }}
-            </li>
-          </ul>
+          <span *ngIf="besluit.Zaak?.length === 1; else multipleZaak">{{
+            besluit.Zaak[0].Onderwerp
+          }}</span>
+          <ng-template #multipleZaak>
+            <ul>
+              <li *ngFor="let onderwerp of besluit.Zaak">
+                {{ onderwerp.Onderwerp }}
+              </li>
+            </ul>
+          </ng-template>
         </td>
       </ng-container>
 
