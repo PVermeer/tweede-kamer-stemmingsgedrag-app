@@ -45,17 +45,13 @@ export class FilterOptionsComponent implements OnInit, OnDestroy {
     year: new FormControl(),
   });
 
-  private setFracties(year: number | null): void {
+  private setFracties(year?: number | null): void {
     this.tweedekamerApi
       .getFracties$({ year })
       .pipe(take(1))
       .subscribe((fracties) => {
         this._fracties$.next(fracties.data);
       });
-  }
-
-  private setYear(year: number | null): void {
-    this.setFracties(year);
   }
 
   constructor(
@@ -85,13 +81,9 @@ export class FilterOptionsComponent implements OnInit, OnDestroy {
           },
           { emitEvent: false },
         );
-      }),
-    );
 
-    // Change fractie list based on year select
-    this._subs.add(
-      this.optionsForm.controls.year.valueChanges.subscribe((year) => {
-        this.setYear(year);
+        // Change fractie list based on year select
+        this.setFracties(filter.year);
       }),
     );
 

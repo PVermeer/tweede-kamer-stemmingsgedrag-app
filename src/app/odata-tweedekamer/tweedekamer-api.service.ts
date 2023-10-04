@@ -26,7 +26,7 @@ export class TweedekamerApiService {
 
   public getFracties$(options?: FractieOptions): Observable<Data<Fractie[]>> {
     const { year, page } = options ?? {};
-    const cacheKey = `${year} fracties`;
+    const cacheKey = `${year ?? null} fracties ${page ?? null}`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
       | Observable<Data<Fractie[]>>
@@ -47,6 +47,7 @@ export class TweedekamerApiService {
         }),
         Verwijderd: { eq: false },
       },
+      orderBy: 'NaamNL asc',
     };
 
     const query = buildQuery<Fractie>(queryOptions);
@@ -60,8 +61,10 @@ export class TweedekamerApiService {
   }
 
   public getBesluiten$(options?: BesluitOptions): Observable<Data<Besluit[]>> {
-    const { year, page, fractieId: fractie, onderwerp } = options ?? {};
-    const cacheKey = `${year} besluiten ${fractie} ${onderwerp} ${page}`;
+    const { year, page, fractieId, onderwerp } = options ?? {};
+    const cacheKey = `${year ?? null} besluiten ${fractieId ?? null} ${
+      onderwerp ?? null
+    } ${page ?? null}`;
 
     let obs$ = this.observablesCache.get(cacheKey) as
       | Observable<Data<Besluit[]>>
@@ -78,13 +81,13 @@ export class TweedekamerApiService {
         Verwijderd: { eq: false },
         Status: { eq: 'Besluit' },
         StemmingsSoort: { ne: null },
-        ...(fractie && {
+        ...(fractieId && {
           Stemming: {
             any: {
               Fractie_Id: {
                 eq: {
                   type: 'guid',
-                  value: fractie,
+                  value: fractieId,
                 },
               },
             },
