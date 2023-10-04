@@ -4,10 +4,19 @@
   width: 100%;
 }
 
+mat-sidenav-container {
+  width: 100%;
+  height: 100%;
+}
+
 .container {
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  > section:not(.toolbar) {
+    padding: 5px;
+  }
 }
 
 .toolbar {
@@ -24,5 +33,19 @@
 }
 
 .spacer {
+  flex: 1 1 auto;
+}
+
+.table-card {
+  overflow: auto;
+  display: flex;
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.table-card-content {
+  display: flex;
+  overflow: auto;
+  height: 100%;
   flex: 1 1 auto;
 }

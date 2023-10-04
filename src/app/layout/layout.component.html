@@ -1,17 +1,29 @@
-<div class="container">
-  <div class="toolbar">
-    <mat-toolbar>
-      <span class="spacer"></span>
-      <span>{{ appTitle }} </span>
-      <span class="spacer"></span>
-    </mat-toolbar>
-  </div>
+<mat-sidenav-container>
+  <mat-sidenav-content>
+    <div class="container">
+      <section class="toolbar">
+        <mat-toolbar color="primary">
+          <span class="spacer"></span>
+          <span>{{ appTitle }} </span>
+          <span class="spacer"></span>
+        </mat-toolbar>
+      </section>
 
-  <div class="filter-options">
-    <app-filter-options></app-filter-options>
-  </div>
+      <section class="filter-options">
+        <mat-card>
+          <mat-card-content>
+            <app-filter-options></app-filter-options>
+          </mat-card-content>
+        </mat-card>
+      </section>
 
-  <div class="table">
-    <app-table></app-table>
-  </div>
-</div>
+      <section class="table">
+        <mat-card class="table-card">
+          <mat-card-content class="table-card-content">
+            <app-table></app-table>
+          </mat-card-content>
+        </mat-card>
+      </section>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
