@@ -1,0 +1,26 @@
+<div class="container">
+  <ng-container *ngFor="let stem of stemming">
+    <span class="stem">
+      <ng-container [ngSwitch]="stem.Soort">
+        <mat-icon
+          *ngSwitchCase="'Voor'"
+          fontIcon="check_circle"
+          style="color: green"
+        ></mat-icon>
+
+        <mat-icon
+          *ngSwitchCase="'Tegen'"
+          fontIcon="cancel"
+          style="color: red"
+        ></mat-icon>
+
+        <mat-icon
+          *ngSwitchDefault
+          fontIcon="radio_button_unchecked"
+          style="color: grey"
+        ></mat-icon>
+      </ng-container>
+      <span class="name">{{ stem.ActorNaam }} ({{ stem.FractieGrootte }})</span>
+    </span>
+  </ng-container>
+</div>

@@ -1,6 +1,6 @@
 <div class="container">
   <mat-accordion>
-    <mat-expansion-panel hideToggle>
+    <mat-expansion-panel hideToggle expanded>
       <mat-expansion-panel-header>
         <mat-panel-title> Stemming </mat-panel-title>
         <mat-panel-description>
@@ -8,9 +8,7 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
 
-      <ul *ngFor="let stem of besluit.Stemming">
-        <li>{{ stem.ActorNaam }}: {{ stem.Soort }}</li>
-      </ul>
+      <app-stemming [stemming]="besluit.Stemming ?? []"></app-stemming>
     </mat-expansion-panel>
 
     <mat-expansion-panel hideToggle>

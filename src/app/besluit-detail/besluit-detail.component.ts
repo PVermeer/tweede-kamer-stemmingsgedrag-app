@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import type { Besluit } from '../odata-tweedekamer/tweedekamer-api.types';
 import { DocumentLinkPipe } from './document-link.pipe';
+import { StemmingComponent } from '../stemming/stemming.component';
 
 @Component({
   selector: 'app-besluit-detail',
@@ -13,6 +14,7 @@ import { DocumentLinkPipe } from './document-link.pipe';
     MatExpansionModule,
     MatButtonModule,
     DocumentLinkPipe,
+    StemmingComponent,
   ],
   templateUrl: './besluit-detail.component.html',
   styleUrls: ['./besluit-detail.component.scss'],

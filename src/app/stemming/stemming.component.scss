@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: 200px;
+  max-height: 45vh;
+  overflow: auto;
+}
+
+.stem {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+  white-space: nowrap;
+}
+
+.name {
+  margin-left: 8px;
+}
