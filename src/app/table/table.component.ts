@@ -24,7 +24,7 @@ import { BesluitDetailComponent } from '../besluit-detail/besluit-detail.compone
 import { FilterOptionsService } from '../filter-options/filter-options.service';
 import { BesluitFilter } from '../filter-options/filter-options.types';
 import { TweedekamerApiService } from '../odata-tweedekamer/tweedekamer-api.service';
-import type { Besluit } from '../odata-tweedekamer/tweedekamer-api.types';
+import type { Besluit } from '../../../functions/src/tweedekamer-api.types';
 
 @Component({
   selector: 'app-table',

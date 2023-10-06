@@ -2,7 +2,7 @@ import { FormControl } from '@angular/forms';
 import {
   BesluitOptions,
   Fractie,
-} from '../odata-tweedekamer/tweedekamer-api.types';
+} from '../../../functions/src/tweedekamer-api.types';
 
 export type BesluitFilter<B = Required<BesluitOptions>> = Partial<{
   [P in keyof B]: B[P] extends string | null

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TweedekamerApiService } from '../odata-tweedekamer/tweedekamer-api.service';
-import type { Document } from '../odata-tweedekamer/tweedekamer-api.types';
+import type { Document } from '../../../functions/src/tweedekamer-api.types';
 
 @Pipe({
   name: 'documentLink',

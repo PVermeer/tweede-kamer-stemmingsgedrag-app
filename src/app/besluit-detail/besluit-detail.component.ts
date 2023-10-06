@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
-import type { Besluit } from '../odata-tweedekamer/tweedekamer-api.types';
+import type { Besluit } from '../../../functions/src/tweedekamer-api.types';
 import { DocumentLinkPipe } from './document-link.pipe';
 import { StemmingComponent } from '../stemming/stemming.component';
 

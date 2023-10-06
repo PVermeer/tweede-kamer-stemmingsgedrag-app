@@ -1,3 +1,7 @@
+export interface TweedekamerApiRequest {
+  queryUrl?: string | null;
+}
+
 interface FractieI {
   AantalStemmen: number;
   AantalZetels: number;

@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Subject, Subscription, debounceTime, take } from 'rxjs';
 import { TweedekamerApiService } from '../odata-tweedekamer/tweedekamer-api.service';
-import { Fractie } from '../odata-tweedekamer/tweedekamer-api.types';
+import { Fractie } from '../../../functions/src/tweedekamer-api.types';
 import { BesluitFilterForm } from './filter-options.types';
 import { FilterOptionsService } from './filter-options.service';
 

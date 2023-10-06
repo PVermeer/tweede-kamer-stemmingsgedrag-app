@@ -6,7 +6,6 @@
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
-      "runtimeArgs": ["--disable-web-security"],
       "preLaunchTask": "npm: start",
       "url": "http://localhost:4200/"
     },

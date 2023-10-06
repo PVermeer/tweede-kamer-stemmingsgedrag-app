@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Functions, httpsCallableData } from '@angular/fire/functions';
 import buildQuery from 'odata-query';
 import { EMPTY, Observable, expand, map, reduce, shareReplay } from 'rxjs';
 import {
@@ -10,7 +10,8 @@ import {
   Fractie,
   FractieOptions,
   ODataResponse,
-} from './tweedekamer-api.types';
+  TweedekamerApiRequest,
+} from '../../../functions/src/tweedekamer-api.types';
 
 @Injectable({
   providedIn: 'root',
@@ -158,7 +159,10 @@ export class TweedekamerApiService {
 
   private oDataExpand<T extends ODataResponse>(response: T): Observable<T> {
     return response['@odata.nextLink']
-      ? this.http.get<T>(response['@odata.nextLink'])
+      ? httpsCallableData<TweedekamerApiRequest, T>(
+          this.functions,
+          'tweedekamerApi',
+        )({ queryUrl: response['@odata.nextLink'] })
       : EMPTY;
   }
 
@@ -194,7 +198,12 @@ export class TweedekamerApiService {
     queryUrl: string,
     page?: number | null,
   ): Observable<Data<T>> {
-    return this.http.get<ODataResponse<T>>(queryUrl).pipe(
+    // Cloud Function or backend is needed because of refusal to enable CORS:
+    // https://github.com/TweedeKamerDerStaten-Generaal/OpenDataPortaal/issues/71
+    return httpsCallableData<TweedekamerApiRequest, ODataResponse<T>>(
+      this.functions,
+      'tweedekamerApi',
+    )({ queryUrl }).pipe(
       expand((response) => this.oDataExpand(response)),
       reduce(this.oDataReduce, {} as ODataResponse<T>),
       map((response) => this.oDataMap(response, page)),
@@ -202,5 +211,5 @@ export class TweedekamerApiService {
     );
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(private functions: Functions) {}
 }
