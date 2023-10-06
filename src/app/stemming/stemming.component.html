@@ -20,7 +20,13 @@
           style="color: grey"
         ></mat-icon>
       </ng-container>
-      <span class="name">{{ stem.ActorNaam }} ({{ stem.FractieGrootte }})</span>
+      <span class="name"
+        >{{ stem.ActorNaam }} ({{
+          stem.ActorNaam !== stem.ActorFractie
+            ? stem.ActorFractie
+            : stem.FractieGrootte
+        }})</span
+      >
     </span>
   </ng-container>
 </div>
