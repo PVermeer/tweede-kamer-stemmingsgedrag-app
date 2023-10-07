@@ -75,6 +75,8 @@ export class TweedekamerApiService {
       return obs$;
     }
 
+    const onderwerpen = this.splitOnderwerp(onderwerp);
+
     const queryOptions = {
       ...this.getBaseQueryOptions(page),
       filter: {
@@ -94,13 +96,25 @@ export class TweedekamerApiService {
             },
           },
         }),
-        ...(onderwerp && {
+        ...(onderwerpen.length && {
           Zaak: {
             any: {
               or: [
-                { Onderwerp: { contains: onderwerp } },
-                { Titel: { contains: onderwerp } },
-                { Citeertitel: { contains: onderwerp } },
+                {
+                  and: onderwerpen.map((word) => {
+                    return { Onderwerp: { contains: word } };
+                  }),
+                },
+                {
+                  and: onderwerpen.map((word) => {
+                    return { Titel: { contains: word } };
+                  }),
+                },
+                {
+                  and: onderwerpen.map((word) => {
+                    return { Citeertitel: { contains: word } };
+                  }),
+                },
               ],
             },
           },
@@ -192,6 +206,16 @@ export class TweedekamerApiService {
     const nextPage = page < totalPages ? page + 1 : null;
 
     return { data: value, count, currentPage: page, nextPage, totalPages };
+  }
+
+  private splitOnderwerp(onderwerp?: string | null): string[] {
+    if (!onderwerp) return [];
+
+    return onderwerp.split(' ').flatMap((word) => {
+      const newWord = word.trim();
+      if (!newWord) return [];
+      return [newWord];
+    });
   }
 
   private getODataQueryObservable$<T extends unknown[]>(
